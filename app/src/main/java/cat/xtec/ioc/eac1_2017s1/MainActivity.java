@@ -1,10 +1,17 @@
 package cat.xtec.ioc.eac1_2017s1;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +19,11 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -182,7 +194,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //Accions del botó 6 (visualitzar web)
+    @SuppressLint("SetTextI18n")
     private void web(){
+
+        // TODO Cal codificar aquest mètode que visualitzi en el telefon la web de l'usuari
+        // Si l'usuari no te web introduïda ha d'aparèixer un Toast amb el missatge
+        // "No hi ha plana web disponible". Si la plana web introduïda no disposa dels
+        // Caràcters http:// cal afegir-los automàticament.
 
         Context context = getApplicationContext();
         CharSequence text = "No hi ha plana web disponible";
@@ -190,28 +208,81 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
-
         TextView web = (TextView) findViewById(R.id.web);
         String url = (String) web.getText();
-        int aux = url.indexOf("http");
-        if (aux == -1){
-            web.setText("http://" + url);
+        if (url.length()<0) {
+            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        } else{
+            // el navegador el movil me falla y no me abre nada, ni manualmente, pero en teoria debe ir bien
+            if (!url.startsWith("http://") && !url.startsWith("https://")){
+                url = "http://" + url;
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
+            }
         }
 
+    }
 
+    private  void checkFields(){
+        //TODO Si tots els camps estan plens (no es comprova que la URL sigui correcta)
+        //S'emmagatzemen les dades en un fitxer de preferències i es mostra un Toast
+        //amb el Missatge. "Dades Enviades". Si hi ha algun cap buit,
+        //es mostra un Toast amb el missatge "Dades incompletes"
 
-        // TODO Cal codificar aquest mètode que visualitzi en el telefon la web de l'usuari
+        // get all childs
+        TextView nom = (TextView) findViewById(R.id.nom);
+        TextView carrer = (TextView) findViewById(R.id.carrer);
+        TextView cp = (TextView) findViewById(R.id.CP);
+        TextView poblacio = (TextView) findViewById(R.id.poblacio);
+        TextView telefon = (TextView) findViewById(R.id.telf);
+        String snom = (String)nom.getText();
+        String scarrer = (String)carrer.getText();
+        String scp = (String)cp.getText();
+        String spoblacio = (String)poblacio.getText();
+        String stelefon = (String)telefon.getText();
 
-        // Si l'usuari no te web introduïda ha d'aparèixer un Toast amb el missatge
-        // "No hi ha plana web disponible". Si la plana web introduïda no disposa dels
-        // Caràcters http:// cal afegir-los automàticament.
+        // comporobar que los datos estan rellenados
+        if (snom.length()>0 && scarrer.length() > 0 && scp.length() >0 && stelefon.length() >0 && spoblacio.length() > 0){
+            if (snom.length() < 0){
+                Toast.makeText(this, "Introdueix el nom", Toast.LENGTH_LONG).show();
+            }if (scarrer.length()<0){
+                Toast.makeText(this, "Introdueix el carrer", Toast.LENGTH_LONG).show();
+            }if (scp.length()<0){
+                Toast.makeText(this, "Introdueix el codi postal", Toast.LENGTH_LONG).show();
+            }if (spoblacio.length()<0){
+                Toast.makeText(this, "Introdueix la poblacio", Toast.LENGTH_LONG).show();
+            }if (stelefon.length()<0){
+                Toast.makeText(this, "Introdueix el telefon", Toast.LENGTH_LONG).show();
+            }else
+            {
+                try {
+                    // DA ERROR
+                    Log.d("file", "created");
+                    File path = Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_MOVIES);
+                    File f = new File(path, "/" + "data.txt");
+                    FileWriter fw = new FileWriter(f);
+                    fw.write("nom" + snom);
+                    fw.write("carrer" + scarrer);
+                    fw.write("cp" + scp);
+                    fw.write("poblacio" + spoblacio);
+                    fw.write("telefon" + stelefon);
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Log.d("dades:" , scarrer + snom + spoblacio +scp + stelefon);
+                Toast.makeText(this, "Dades Enviades", Toast.LENGTH_LONG).show();
+            }
 
+        }
     }
 
     /**
      * Gestionem els clic dels botons
      * @param view Vista que s'ha clicat
      */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onClick(View view) {
 
@@ -245,18 +316,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 web();
                 break;
             case R.id.btnEnvia:
-
-                //TODO Si tots els camps estan plens (no es comprova que la URL sigui correcta)
-                //S'emmagatzemen les dades en un fitxer de preferències i es mostra un Toast
-                //amb el Missatge. "Dades Enviades". Si hi ha algun cap buit,
-                //es mostra un Toast amb el missatge "Dades incompletes"
-
-                // get all childs
-                TextView nom = (TextView) findViewById(R.id.nom);
-                nom.getText();
-                System.out.println("nom" + nom);
-                Toast.makeText(this, "Dades Enviades", Toast.LENGTH_LONG).show();
-
+                checkFields();
 
             default:
                 break;

@@ -1,0 +1,2 @@
+Para almacenar los datos en sqlite, deberiamos crear las clase usuario con los datos del formulario, con sus getters y seters
+Y la clase SQLiteOpenHelper para establecer la conexion a la bd con sus metodos onUpgrade y onDowngrade, luego instanciar esa clase en el Main, pasandole el nombre de la base de datos y la version
