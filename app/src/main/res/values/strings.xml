@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">EAC1-2017S1</string>
+    <string name="adreca">Adreça</string>
+    <string name="carrer">Carrer: </string>
+    <string name="CP">Codi Postal: </string>
+    <string name="poblacio">Població: </string>
+    <string name="DadesPers">Dades Personals</string>
+    <string name="telf">Telèfon: </string>
+    <string name="web">Pàgina Web: </string>
+    <string name="envia">Envia</string>
+    <string name="title_activity_edit_opc">Edita opció</string>
+    <string name="hintEmpty">Valor no definit</string>
+    <string name="nom">Nom i cognoms</string>
+    <string name="ok">Accepta</string>
+    <string name="ko">Cancel·la</string>
+    <string name="telfNoOk">El camp \"telèfon\" està buit</string>
+
+</resources>
