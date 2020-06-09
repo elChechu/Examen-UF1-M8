@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton[] buttonsNom;
     ImageButton[] buttons;
     Button btnEnvia;
+    Button maps;
     TextView[] textViews;
     EditText editNom;
     LinearLayout[] layouts;
@@ -69,6 +70,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnEnvia = (Button) findViewById(R.id.btnEnvia);
         btnEnvia.setOnClickListener(this);
 
+
+        // Inicialitzem i afegim el listener del botó d'enviar
+        maps = (Button) findViewById(R.id.map);
+        maps.setOnClickListener(this);
+
+
+
         // Inicialitzem els textviews
         textViews = new TextView[]{
                 (TextView) findViewById(R.id.carrer),
@@ -87,6 +95,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 (LinearLayout) findViewById(R.id.layout1),
                 (LinearLayout) findViewById(R.id.layout2)
         };
+
+//        Button maps = (Button) findViewById(R.id.map);
+//        maps.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                System.out.println("boton de gogole maps pulsad");
+//                openGoogleMaps();
+//            }
+//        });
+
 
         //Establim la visualització dels elements a l'estat inicial
         inici();
@@ -207,22 +225,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+
         TextView web = (TextView) findViewById(R.id.web);
         String url = (String) web.getText();
-        if (url.length()<0) {
-            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
-        } else{
-            // el navegador el movil me falla y no me abre nada, ni manualmente, pero en teoria debe ir bien
-            if (!url.startsWith("http://") && !url.startsWith("https://")){
+        int sizeurl =  url.length();
+
+        // el navegador el movil me falla y no me abre nada, ni manualmente, pero en teoria debe ir bien
+        if (sizeurl>0) {
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+
+                web.setText("http://" + url);
                 url = "http://" + url;
+
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(browserIntent);
             }
+        }else
+        {
+//            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+            toast.show();
         }
-
     }
 
+
+    private void openGoogleMaps(){
+
+        System.out.println("metodo google maps");
+        Intent maps = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=cerdanyola"));
+        startActivity(maps);
+
+    }
     private  void checkFields(){
         //TODO Si tots els camps estan plens (no es comprova que la URL sigui correcta)
         //S'emmagatzemen les dades en un fitxer de preferències i es mostra un Toast
@@ -230,51 +262,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //es mostra un Toast amb el missatge "Dades incompletes"
 
         // get all childs
-        TextView nom = (TextView) findViewById(R.id.nom);
+        TextView web = (TextView) findViewById(R.id.web);
         TextView carrer = (TextView) findViewById(R.id.carrer);
         TextView cp = (TextView) findViewById(R.id.CP);
         TextView poblacio = (TextView) findViewById(R.id.poblacio);
         TextView telefon = (TextView) findViewById(R.id.telf);
-        String snom = (String)nom.getText();
-        String scarrer = (String)carrer.getText();
-        String scp = (String)cp.getText();
-        String spoblacio = (String)poblacio.getText();
-        String stelefon = (String)telefon.getText();
+
 
         // comporobar que los datos estan rellenados
-        if (snom.length()>0 && scarrer.length() > 0 && scp.length() >0 && stelefon.length() >0 && spoblacio.length() > 0){
-            if (snom.length() < 0){
-                Toast.makeText(this, "Introdueix el nom", Toast.LENGTH_LONG).show();
-            }if (scarrer.length()<0){
-                Toast.makeText(this, "Introdueix el carrer", Toast.LENGTH_LONG).show();
-            }if (scp.length()<0){
-                Toast.makeText(this, "Introdueix el codi postal", Toast.LENGTH_LONG).show();
-            }if (spoblacio.length()<0){
-                Toast.makeText(this, "Introdueix la poblacio", Toast.LENGTH_LONG).show();
-            }if (stelefon.length()<0){
-                Toast.makeText(this, "Introdueix el telefon", Toast.LENGTH_LONG).show();
-            }else
-            {
-                try {
-                    // DA ERROR
-                    Log.d("file", "created");
-                    File path = Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_MOVIES);
-                    File f = new File(path, "/" + "data.txt");
-                    FileWriter fw = new FileWriter(f);
-                    fw.write("nom" + snom);
-                    fw.write("carrer" + scarrer);
-                    fw.write("cp" + scp);
-                    fw.write("poblacio" + spoblacio);
-                    fw.write("telefon" + stelefon);
-                    fw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Log.d("dades:" , scarrer + snom + spoblacio +scp + stelefon);
-                Toast.makeText(this, "Dades Enviades", Toast.LENGTH_LONG).show();
-            }
+        if (web.getText().length()>0 && carrer.getText().length() > 0 && cp.getText().length() >0 && telefon.getText().length() >0 && poblacio.getText().length() > 0){
 
+            SharedPreferences prefs =
+                    getSharedPreferences("ficheroconfiguracion",
+                            Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("cp", cp.getText().toString());
+            editor.putString("poblacio", poblacio.getText().toString());
+            editor.putString("web", web.getText().toString());
+            editor.putString("telefon", telefon.getText().toString());
+            editor.putString("carrer", carrer.getText().toString());
+            editor.commit();
+
+            Toast.makeText(this, "Dades Enviades", Toast.LENGTH_LONG).show();
+
+
+        }else {
+            if (carrer.getText().length() <= 0){
+                Toast.makeText(this, "Introdueix el nom", Toast.LENGTH_LONG).show();
+            } if (cp.getText().length() <= 0){
+                Toast.makeText(this, "Introdueix el codi postal", Toast.LENGTH_LONG).show();
+            } if (poblacio.getText().length()<=0){
+                Toast.makeText(this, "Introdueix la poblacio", Toast.LENGTH_LONG).show();
+            } if (telefon.getText().length()<=0){
+                Toast.makeText(this, "Introdueix el telefon", Toast.LENGTH_LONG).show();
+            } if (web.getText().length()<=0){
+                Toast.makeText(this, "Introdueix la web", Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(this, "Falten totes les dades", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -317,6 +342,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btnEnvia:
                 checkFields();
+                break;
+
+            case R.id.map:
+                System.out.println("cse googel maps");
+                openGoogleMaps();
+                break;
+
 
             default:
                 break;
